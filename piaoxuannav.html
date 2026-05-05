@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>飘轩名优 · 门店导航</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f5f5; color: #333; }
+
+  /* 顶部横幅 */
+  .header {
+    background: linear-gradient(135deg, #1a1a1a 0%, #3d2b1f 100%);
+    color: #fff;
+    padding: 28px 20px 24px;
+    text-align: center;
+  }
+  .header .logo { font-size: 20px; font-weight: 700; letter-spacing: 3px; margin-bottom: 6px; }
+  .header .sub { font-size: 13px; color: rgba(255,255,255,0.6); letter-spacing: 1px; }
+
+  /* 统计 */
+  .stats { display: flex; background: #fff; border-bottom: 1px solid #eee; }
+  .stat { flex: 1; text-align: center; padding: 16px 0; }
+  .stat + .stat { border-left: 1px solid #eee; }
+  .stat .num { font-size: 22px; font-weight: 700; color: #b8860b; }
+  .stat .lab { font-size: 12px; color: #999; margin-top: 2px; }
+
+  /* 地区切换 */
+  .tabs { display: flex; background: #fff; padding: 0 12px; border-bottom: 1px solid #eee; overflow-x: auto; }
+  .tab { flex-shrink: 0; padding: 12px 14px; font-size: 14px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; }
+  .tab.active { color: #b8860b; border-bottom-color: #b8860b; font-weight: 600; }
+  .tab::-webkit-scrollbar { display: none; }
+
+  /* 门店列表 */
+  .list { padding: 12px 16px 80px; }
+  .city-section { display: none; }
+  .city-section.active { display: block; }
+  .city-title { font-size: 13px; color: #999; padding: 12px 0 8px; letter-spacing: 1px; }
+
+  .store-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .store-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .store-name { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+  .store-tag {
+    font-size: 11px;
+    background: #fff3e0;
+    color: #b8860b;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    margin-left: 8px;
+    font-weight: 500;
+  }
+  .store-addr { font-size: 13px; color: #888; line-height: 1.5; margin-bottom: 14px; }
+
+  /* 导航按钮组 */
+  .nav-btns { display: flex; gap: 10px; }
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    color: #fff;
+    cursor: pointer;
+  }
+  .nav-btn:active { opacity: 0.85; }
+  .btn-tx { background: #07c160; }
+  .btn-gd { background: #1677ff; }
+  .btn-bd { background: #2932e1; }
+
+  /* 底部固定提示 */
+  .bottom-tip {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid #eee;
+    padding: 10px 16px;
+    font-size: 12px;
+    color: #999;
+    text-align: center;
+    z-index: 100;
+  }
+
+  @media (min-width: 600px) {
+    .list { max-width: 600px; margin: 0 auto; }
+    .bottom-tip { max-width: 600px; margin: 0 auto; left: 50%; transform: translateX(-50%); }
+  }
+</style>
+</head>
+<body>
+
+<!-- 顶部 -->
+<div class="header">
+  <div class="logo">飘轩名优</div>
+  <div class="sub">沈阳 · 鞍山 · 铁岭 · 15家直营门店</div>
+</div>
+
+<!-- 统计 -->
+<div class="stats">
+  <div class="stat">
+    <div class="num">15</div>
+    <div class="lab">直营门店</div>
+  </div>
+  <div class="stat">
+    <div class="num">30余年</div>
+    <div class="lab">诚信经营</div>
+  </div>
+  <div class="stat">
+    <div class="num">15W+</div>
+    <div class="lab">会员信赖</div>
+  </div>
+</div>
+
+<!-- 地区切换 -->
+<div class="tabs">
+  <div class="tab active" data-city="all">全部</div>
+  <div class="tab" data-city="沈阳">沈阳</div>
+  <div class="tab" data-city="鞍山">鞍山</div>
+  <div class="tab" data-city="铁岭">铁岭</div>
+</div>
+
+<!-- 门店列表 -->
+<div class="list" id="storeList">
+  <!-- 由JS动态填充 -->
+</div>
+
+<!-- 底部提示 -->
+<div class="bottom-tip">点击地图按钮，一键导航到店 · 假一赔十 · 品质保证</div>
+
+<script>
+var stores = [
+  { name: "飘轩名优奉天旗舰店", addr: "辽宁省沈阳市沈河区奉天街419号", city: "沈阳", tag: "旗舰店" },
+  { name: "飘轩名优南八店", addr: "辽宁省沈阳市和平区南八马路20号", city: "沈阳", tag: "" },
+  { name: "飘轩名优建大店", addr: "辽宁省沈阳市铁西区建设东路55号1门", city: "沈阳", tag: "" },
+  { name: "飘轩名优小南店", addr: "辽宁省沈阳市沈河区南关路78-2号", city: "沈阳", tag: "" },
+  { name: "飘轩名优大西店", addr: "辽宁省沈阳市沈河区金厦广场北门西140米", city: "沈阳", tag: "" },
+  { name: "飘轩名优于洪店", addr: "辽宁省沈阳市于洪区黄海路25号3门黄海花园小区旁", city: "沈阳", tag: "" },
+  { name: "飘轩名优五中店", addr: "辽宁省沈阳市大东区大北关街44号17门", city: "沈阳", tag: "" },
+  { name: "飘轩名优凤鸣店", addr: "辽宁省沈阳市苏家屯区迎春街与翠柏路交叉口东南20米", city: "沈阳", tag: "" },
+  { name: "飘轩名优鞍山店", addr: "辽宁省鞍山市铁东区南胜利路68号甲8号", city: "鞍山", tag: "" },
+  { name: "华元名优新兴店", addr: "辽宁省鞍山市铁东区南建国路1楼1号", city: "鞍山", tag: "" },
+  { name: "华元名优九中店", addr: "辽宁省鞍山市铁东区园林街道园林路91-1号", city: "鞍山", tag: "" },
+  { name: "东业名优鞍山店", addr: "辽宁省鞍山市铁东区新华街31栋1-3层", city: "鞍山", tag: "" },
+  { name: "华元名优湖南店", addr: "辽宁省鞍山市铁东区湖南街120-7号", city: "鞍山", tag: "" },
+  { name: "飘轩名优铁岭店", addr: "辽宁省铁岭市银州区柴河街4-3号", city: "铁岭", tag: "" },
+  { name: "鞍山八马茶叶旗舰店", addr: "辽宁省鞍山市铁东区工人街61号", city: "鞍山", tag: "" },
+];
+
+var cityMap = { "沈阳": [], "鞍山": [], "铁岭": [] };
+
+stores.forEach(function(s) {
+  var encodedName = encodeURIComponent(s.name);
+  var encodedAddr = encodeURIComponent(s.addr);
+  var tagHtml = s.tag ? '<span class="store-tag">' + s.tag + '</span>' : '';
+
+  var card = document.createElement("div");
+  card.className = "store-card";
+  card.dataset.city = s.city;
+  card.innerHTML =
+    '<div class="store-top">' +
+      '<div class="store-name">' + s.name + '</div>' + tagHtml +
+    '</div>' +
+    '<div class="store-addr">' + s.addr + '</div>' +
+    '<div class="nav-btns">' +
+      '<a class="nav-btn btn-tx" href="qqmap://map/search?keyword=' + encodedName + '&refer=飘轩名优">腾讯地图</a>' +
+      '<a class="nav-btn btn-gd" href="androidamap://viewMap?sourceApplication=飘轩名优&poiname=' + encodedName + '&lat=&lng=&dev=0">高德地图</a>' +
+      '<a class="nav-btn btn-bd" href="baidumap://map/geocoder?src=飘轩名优&address=' + encodedAddr + '">百度地图</a>' +
+    '</div>';
+
+  document.getElementById("storeList").appendChild(card);
+  cityMap[s.city].push(card);
+});
+
+// 切换Tab
+document.querySelectorAll(".tab").forEach(function(tab) {
+  tab.addEventListener("click", function() {
+    document.querySelectorAll(".tab").forEach(function(t) { t.classList.remove("active"); });
+    this.classList.add("active");
+    var city = this.dataset.city;
+    document.querySelectorAll(".store-card").forEach(function(card) {
+      card.style.display = (city === "all" || card.dataset.city === city) ? "" : "none";
+    });
+  });
+});
+</script>
+</body>
+</html>
